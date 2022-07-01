@@ -47,7 +47,8 @@ class Application(tk.Frame):
 
         self.Route_view.focus_set()
 
-        Sinbol.Track_01("1RAT",550,550)
+        Sinbol.Track_01("1RAT",550,550,300,True,True,True)
+        Sinbol.Track_02("21T",[220,520,240,520,300,560,320,560])
         Sinbol.Sinbol_02(750,450,"None")
 
     def new_track(self,event):

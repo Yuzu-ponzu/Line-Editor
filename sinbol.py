@@ -32,37 +32,44 @@ class Canvas_object:
 #着点有/発点両方向
 class Track_01(Canvas_object):
 
-    def __init__(self,name,x,y,lengh):
+    def __init__(self,name,x,y,length,left,right,button):
 
-        self.name,self.x,self.y=name,x,y
-        self.EndPointOffset,self.Track_length,self.size=50,300,20
+        self.name,self.x,self.y,self.left,self.right,self.parts=name,x,y,left,right,["A"]
+        self.EndPointOffset,self.Track_length,self.size,self.button=50,length,20,button
         Canvas_object.canvas.create_line(self.x,self.y,self.x+self.Track_length,self.y,fill="white",width=2,tags=self.name+"A")
-        Canvas_object.canvas.create_polygon(
-            self.x+self.EndPointOffset,self.y,
-            self.x+self.EndPointOffset+self.size,self.y+int(self.size/2),
-            self.x+self.EndPointOffset+self.size,self.y-int(self.size/2),
-            width=2,outline="white",fill="black",tags=self.name+"B"
+        if self.left==True:
+            Canvas_object.canvas.create_polygon(
+                self.x+self.EndPointOffset,self.y,
+                self.x+self.EndPointOffset+self.size,self.y+int(self.size/2),
+                self.x+self.EndPointOffset+self.size,self.y-int(self.size/2),
+                width=2,outline="white",fill="black",tags=self.name+"B"
+                )
+            self.parts.append("B")
+        if self.right==True:
+            Canvas_object.canvas.create_polygon(
+                self.x+self.Track_length-self.EndPointOffset+self.size,self.y,
+                self.x+self.Track_length-self.EndPointOffset,self.y+int(self.size/2),
+                self.x+self.Track_length-self.EndPointOffset,self.y-int(self.size/2),
+                width=2,outline="white",fill="black",tags=self.name+"C"
+                )
+            self.parts.append("C")
+        if self.button!=False:
+            Canvas_object.canvas.create_oval(
+                self.x+int(self.Track_length/2)-int(self.size/2),self.y-int(self.size/2),
+                self.x+int(self.Track_length/2)+int(self.size/2),self.y+int(self.size/2),
+                width=2,outline="white",tags=self.name+"D",fill="black"
             )
-        Canvas_object.canvas.create_polygon(
-            self.x+self.Track_length-self.EndPointOffset+self.size,self.y,
-            self.x+self.Track_length-self.EndPointOffset,self.y+int(self.size/2),
-            self.x+self.Track_length-self.EndPointOffset,self.y-int(self.size/2),
-            width=2,outline="white",fill="black",tags=self.name+"B"
-            )
-        Canvas_object.canvas.create_oval(
-            self.x+int(self.Track_length/2)-self.size,self.y+int(self.size/2),
-            self.x+int(self.Track_length/2)+self.size,self.y-int(self.size/2),
-            width=2,outline="white",tags=self.name+"C"
-        )
-        Canvas_object.event_bind(self,self.name,["A","B","C","D"],self.x,self.y,False)
+            self.parts.append("D")
+        Canvas_object.event_bind(self,self.name,self.parts,self.x,self.y,False)
 
 #着点有/発点片方向
 class Track_02(Canvas_object):
 
-    def __init__(self):
+    def __init__(self,name,line):
 
-        pass
-
+        self.name,self.line=name,line
+        Canvas_object.canvas.create_line(self.line,fill="white",width=2,tags=self.name+"A")
+        Canvas_object.event_bind(self,self.name,["A"],self.x,self.y,False)
 #
 class Free_track(Canvas_object):
 
