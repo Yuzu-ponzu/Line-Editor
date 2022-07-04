@@ -20,40 +20,68 @@ class Application(tk.Frame):
         self.Route_view.pack(side=tk.LEFT)
 
         self.isSnap=True
-        self.mode=""
+        self.isMode=""
         self.grid_modo=True
         self.mouseX,self.mouseY=0,0
         self.track_name=""
+        self.object_count=0
+        self.object_list=[]
         self.track_x,self.track_y=[],[]
         self.point_var=tk.StringVar()
         Sinbol.Canvas_object.canvas=self.Route_view
 
         self.point_label=tk.Label(self.Route_view,textvariable=self.point_var,bg="white",font=("HG丸ｺﾞｼｯｸM-PRO",14,"bold"))
-        self.back_line=tk.Button(self.Route_view,text="Track",font=("HG丸ｺﾞｼｯｸM-PRO",14,"bold"),bg="white",command=lambda:self.new_track("None"))
-        self.load_line=tk.Button(self.Route_view,text="Load",font=("HG丸ｺﾞｼｯｸM-PRO",14,"bold"),bg="white")
-        self.clear_list=tk.Button(self.Route_view,text="Clear",font=("HG丸ｺﾞｼｯｸM-PRO",14,"bold"),bg="white")
+        self.make_line=tk.Button(self.Route_view,text="Track",font=("HG丸ｺﾞｼｯｸM-PRO",14,"bold"),bg="white",command=lambda:self.new_track("None"))
+        self.load_button=tk.Button(self.Route_view,text="Load",font=("HG丸ｺﾞｼｯｸM-PRO",14,"bold"),bg="white")
+        self.Save_button=tk.Button(self.Route_view,text="Save",font=("HG丸ｺﾞｼｯｸM-PRO",14,"bold"),bg="white")
         self.open_menu=tk.Button(self.Route_view,text="Menu",font=("HG丸ｺﾞｼｯｸM-PRO",14,"bold"),bg="white")
+        self.signal_menu=tk.Button(self.Route_view,text="Signal",font=("HG丸ｺﾞｼｯｸM-PRO",14,"bold"),bg="white",command=lambda:self.signal_select("None"))
         self.line_mode=tk.Button(self.Route_view,text="Grid",font=("HG丸ｺﾞｼｯｸM-PRO",14,"bold"),bg="white",command=lambda:self.base_line("None"))
         self.open_menu.place(x=1160,y=840)
-        self.back_line.place(x=1400,y=840)
-        self.load_line.place(x=1320,y=840)
+        self.make_line.place(x=1400,y=840)
+        self.load_button.place(x=1320,y=840)
         self.line_mode.place(x=130,y=840)
-        self.clear_list.place(x=1240,y=840)
+        self.Save_button.place(x=1240,y=840)
+        self.signal_menu.place(x=1070,y=840)
         self.point_label.place(x=20,y=840,width=100,height=37)
 
-        self.Route_view.bind("<Motion>",self.get_mouse) 
+        self.Route_view.bind("<Motion>",self.get_mouse)
+        self.Route_view.bind("<Return>",self.make_track,"+")
+        self.Route_view.bind("<Button-1>",self.add_track,"+")
         self.Route_view.bind('<Control-t>',self.new_track,"+")
         self.Route_view.bind('<Control-b>',self.base_line,"+")
+        self.Route_view.bind('<Control-q>',self.signal_select,"+")
 
         self.Route_view.focus_set()
 
-        Sinbol.Track_01("1RAT",550,550,300,True,True,True)
-        Sinbol.Track_02("21T",[220,520,240,520,300,560,320,560])
+        Sinbol.Track("1RAT",550,550,300,True,True,True,True,35,True)
+        Sinbol.Track("1RBT",550,600,300,True,True,True,False,0,True)
+        Sinbol.Track("1RCT",550,650,300,True,False,True,False,0,True)
+        Sinbol.Track("1RDT",550,700,300,False,True,True,False,0,True)
+        #Sinbol.Free_track("21T",[220,520,240,520,300,560,320,560])
         Sinbol.Sinbol_02(750,450,"None")
 
     def new_track(self,event):
 
         self.entry_box(event,"軌道回路名 入力","軌道回路 名称")
+    
+    def add_track(self,event):
+
+        if self.isMode=="add track point":
+            self.track_x.append(int(event.x/5)*5)
+            self.track_y.append(int(event.y/5)*5)
+            track_len=len(self.track_x)
+            if track_len>=1:
+                self.Route_view.create_line(self.track_x[track_len-2],self.track_y[track_len-2],self.track_x[track_len-1],self.track_y[track_len-1],width=2,fill="white",tag="new_track")
+    
+    def make_track(self,event):
+
+        self.isMode=""
+        self.Route_view.delete("new_track")
+        self.make_line.config(background="white")
+        if len(self.track_x)>=1:
+            Sinbol.Free_track(self.track_name,self.track_x,self.track_y)
+        self.track_name,self.track_x,self.track_y="",[],[]
 
     def entry_box(self,event,name,meg):
 
@@ -61,22 +89,72 @@ class Application(tk.Frame):
         self.dialog.title(name)
         self.dialog.geometry("300x50+750+450")
         self.dialog.resizable(width=False, height=False)                                                            
-        self.dialog.grab_set()
-        self.dialog.focus_set()
         self.dialog.transient(self.master)
         self.entry_box=ttk.Entry(self.dialog,width=30)
         entry_label=ttk.Label(self.dialog,text=meg)
         self.entry_box.place(x=((len(meg)-1)*15+5),y=15)
         entry_label.place(x=10,y=15)
         self.entry_box.bind('<Return>',self.track_add)
+        self.dialog.grab_set()
+        self.dialog.focus_set()
         self.entry_box.focus_get()
+
+    def signal_select(self,event):
+
+        self.sig_select_menu=tk.Toplevel(self)
+        self.sig_select_menu.title("信号機 選択")
+        self.sig_select_menu.geometry("200x160+850+450")
+        self.sig_select_menu.resizable(width=False, height=False)                                                            
+        self.sig_select_menu.transient(self.master)
+        self.sig_select_menu.grab_set()
+        self.sig_select_menu.focus_set()
+        info_label,label_object,y=["信号種類","現示種類","設置形態","  進路数  "],[],10
+        signal_list=["場内信号機","出発信号機","入換信号機","誘導信号機","入換識別灯","入換標識"]
+        signal_types=["R,G","R,Y","R,YY,Y","R,Y,G","R,YY,Y,G","R,Y,YG,G","--設定不能--"]
+        signal_inset=["柱上(単独)","柱上(付属)","懸垂式","地上直置き","信号機本体のみ"]
+        menu_frame=tk.Frame(self.sig_select_menu,height=600,width=720)
+        self.parts_pudown=ttk.Combobox(menu_frame,state="readonly",values=signal_list)
+        self.parts_pudown.current(0)
+        self.inset_pudown=ttk.Combobox(menu_frame,state="readonly",values=signal_inset)
+        self.inset_pudown.current(0)
+        self.parts_pudown.bind('<<ComboboxSelected>>',self.signal_typeset)
+        self.types_pudown=ttk.Combobox(menu_frame,state="readonly",values=signal_types)
+        self.types_pudown.current(3)
+        self.inset_pudown.place(x=80,y=70,width=110)
+        self.types_pudown.place(x=80,y=40,width=110)
+        self.parts_pudown.place(x=80,y=10,width=110)
+        self.couse_entrty=ttk.Entry(self.sig_select_menu)
+        self.couse_entrty.place(x=80,y=100,width=110)
+        signal_add=ttk.Button(menu_frame,text="OK")
+        signal_add.place(x=70,y=130)
+        for i in range(len(info_label)):
+            label_object.append(tk.Label(menu_frame,text=info_label[i],background="white"))
+            label_object[i].place(x=10,y=y)
+            y+=30
+        menu_frame.pack()
+    
+    def signal_typeset(self,event):
+
+        index,light=self.parts_pudown.get(),self.types_pudown.get()
+        if index=="誘導信号機":
+            self.types_pudown.config(state="readonly")
+            self.types_pudown["values"]=["灯列式","色灯式"]
+            self.types_pudown.set("灯列式")
+        elif not(index=="場内信号機" or index=="出発信号機"):
+            self.types_pudown.set("--設定不能--")
+            self.types_pudown.config(state="disabled")
+        else:
+            self.types_pudown.config(state="readonly")
+            self.types_pudown["values"]=["R,G","R,Y","R,YY,Y","R,Y,G","R,YY,Y,G","R,Y,YG,G","--設定不能--"]
+            self.types_pudown.current(3)
 
     def track_add(self,event):
 
         track=self.entry_box.get()
         if track=="":
             return
-        self.mode="make track"
+        self.isMode="add track point"
+        self.make_line.config(background="green")
         self.dialog.destroy()
 
     def switch_isSnap(self):
