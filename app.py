@@ -103,15 +103,17 @@ class Application(tk.Frame):
 
         self.sig_select_menu=tk.Toplevel(self)
         self.sig_select_menu.title("信号機 選択")
-        self.sig_select_menu.geometry("200x160+850+450")
+        self.sig_select_menu.geometry("200x200+850+450")
         self.sig_select_menu.resizable(width=False, height=False)                                                            
         self.sig_select_menu.transient(self.master)
         self.sig_select_menu.grab_set()
         self.sig_select_menu.focus_set()
-        info_label,label_object,y=["信号種類","現示種類","設置形態","  進路数  "],[],10
-        signal_list=["場内信号機","出発信号機","入換信号機","誘導信号機","入換識別灯","入換標識"]
+        info_label,label_object,y=["信号種類","現示種類","設置形態","付属設備","誘導設置"],[],10
+        signal_list=["場内信号機","出発信号機","入換信号機","入換標識","入信 入標共用"]
         signal_types=["R,G","R,Y","R,YY,Y","R,Y,G","R,YY,Y,G","R,Y,YG,G","--設定不能--"]
         signal_inset=["柱上(単独)","柱上(付属)","懸垂式","地上直置き","信号機本体のみ"]
+        signal_attached=["入換信号機","入換標識","入信 入標共用","入信(誘導付属)","設定しない"]
+        signal_indect=["設置する","設置しない"]
         menu_frame=tk.Frame(self.sig_select_menu,height=600,width=720)
         self.parts_pudown=ttk.Combobox(menu_frame,state="readonly",values=signal_list)
         self.parts_pudown.current(0)
@@ -120,33 +122,56 @@ class Application(tk.Frame):
         self.parts_pudown.bind('<<ComboboxSelected>>',self.signal_typeset)
         self.types_pudown=ttk.Combobox(menu_frame,state="readonly",values=signal_types)
         self.types_pudown.current(3)
+        self.attached_pudown=ttk.Combobox(menu_frame,state="readonly",values=signal_attached)
+        self.attached_pudown.current(4)
+        self.indect_pudown=ttk.Combobox(menu_frame,state="readonly",values=signal_indect)
+        self.indect_pudown.current(1)
         self.inset_pudown.place(x=80,y=70,width=110)
         self.types_pudown.place(x=80,y=40,width=110)
         self.parts_pudown.place(x=80,y=10,width=110)
-        self.couse_entrty=ttk.Entry(self.sig_select_menu)
-        self.couse_entrty.place(x=80,y=100,width=110)
-        signal_add=ttk.Button(menu_frame,text="OK")
-        signal_add.place(x=70,y=130)
+        self.indect_pudown.place(x=80,y=130,width=110)
+        self.attached_pudown.place(x=80,y=100,width=110)
+        signal_add=ttk.Button(menu_frame,text="OK",command=self.signal_getconfig)
+        signal_add.place(x=70,y=160)
         for i in range(len(info_label)):
             label_object.append(tk.Label(menu_frame,text=info_label[i],background="white"))
             label_object[i].place(x=10,y=y)
             y+=30
         menu_frame.pack()
+
+    def signal_getconfig(self):
+
+        signal_type=self.parts_pudown.get()
+        signal_light=self.types_pudown.get()
+        signal_inset=self.inset_pudown.get()
+        self.sig_select_menu.destroy()
+        if signal_type==("場内信号機" or "出発信号機"):
+            pass
+        print(signal_type,signal_light,signal_inset)
     
     def signal_typeset(self,event):
 
-        index,light=self.parts_pudown.get(),self.types_pudown.get()
-        if index=="誘導信号機":
-            self.types_pudown.config(state="readonly")
-            self.types_pudown["values"]=["灯列式","色灯式"]
-            self.types_pudown.set("灯列式")
-        elif not(index=="場内信号機" or index=="出発信号機"):
+        type=self.parts_pudown.get()
+        if not(type=="場内信号機" or type=="出発信号機"):
             self.types_pudown.set("--設定不能--")
             self.types_pudown.config(state="disabled")
+            self.attached_pudown.set("--設定不能--")
+            self.attached_pudown.config(state="disabled")
+            if type=="入換標識":
+                self.indect_pudown.set("--設定不能--")
+                self.indect_pudown.config(state="disabled")
+            else :
+                self.indect_pudown.config(state="readonly")
+                self.indect_pudown["values"]=["設置する","設置しない"]
+                self.indect_pudown.current(1)
         else:
             self.types_pudown.config(state="readonly")
             self.types_pudown["values"]=["R,G","R,Y","R,YY,Y","R,Y,G","R,YY,Y,G","R,Y,YG,G","--設定不能--"]
             self.types_pudown.current(3)
+            self.attached_pudown.config(state="readonly")
+            self.attached_pudown["values"]=["入換信号機","入換標識","入信 入標共用","入信(誘導付属)","設定しない"]
+            self.attached_pudown.current(4)
+        
 
     def track_add(self,event):
 
