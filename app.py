@@ -33,23 +33,27 @@ class Application(tk.Frame):
         self.point_label=tk.Label(self.Route_view,textvariable=self.point_var,bg="white",font=("HG丸ｺﾞｼｯｸM-PRO",14,"bold"))
         self.make_line=tk.Button(self.Route_view,text="Track",font=("HG丸ｺﾞｼｯｸM-PRO",14,"bold"),bg="white",command=lambda:self.new_track("None"))
         self.load_button=tk.Button(self.Route_view,text="Load",font=("HG丸ｺﾞｼｯｸM-PRO",14,"bold"),bg="white")
-        self.Save_button=tk.Button(self.Route_view,text="Save",font=("HG丸ｺﾞｼｯｸM-PRO",14,"bold"),bg="white")
+        self.save_button=tk.Button(self.Route_view,text="Save",font=("HG丸ｺﾞｼｯｸM-PRO",14,"bold"),bg="white")
         self.open_menu=tk.Button(self.Route_view,text="Menu",font=("HG丸ｺﾞｼｯｸM-PRO",14,"bold"),bg="white")
+        self.turnout_win=tk.Button(self.Route_view,text="Turnout",font=("HG丸ｺﾞｼｯｸM-PRO",14,"bold"),bg="white",command=lambda:self.TurnOut_setup("None"))
         self.signal_menu=tk.Button(self.Route_view,text="Signal",font=("HG丸ｺﾞｼｯｸM-PRO",14,"bold"),bg="white",command=lambda:self.signal_select("None"))
         self.line_mode=tk.Button(self.Route_view,text="Grid",font=("HG丸ｺﾞｼｯｸM-PRO",14,"bold"),bg="white",command=lambda:self.base_line("None"))
-        self.open_menu.place(x=1160,y=840)
-        self.make_line.place(x=1400,y=840)
-        self.load_button.place(x=1320,y=840)
-        self.line_mode.place(x=130,y=840)
-        self.Save_button.place(x=1240,y=840)
-        self.signal_menu.place(x=1070,y=840)
-        self.point_label.place(x=20,y=840,width=100,height=37)
 
+        self.load_button.place(x=1410,y=840)
+        self.save_button.place(x=1335,y=840)
+        self.open_menu.place(x=1255,y=840)
+        self.make_line.place(x=1175,y=840)
+        self.signal_menu.place(x=1090,y=840)
+        self.turnout_win.place(x=985,y=840)
+        self.line_mode.place(x=140,y=840)
+        self.point_label.place(x=20,y=840,width=100,height=37)
+        
         self.Route_view.bind("<Motion>",self.get_mouse)
         self.Route_view.bind("<Return>",self.make_track,"+")
         self.Route_view.bind("<Button-1>",self.add_track,"+")
         self.Route_view.bind('<Control-t>',self.new_track,"+")
         self.Route_view.bind('<Control-b>',self.base_line,"+")
+        self.Route_view.bind('<Control-t>',self.TurnOut_setup,"+")
         self.Route_view.bind('<Control-q>',self.signal_select,"+")
 
         self.Route_view.focus_set()
@@ -98,6 +102,8 @@ class Application(tk.Frame):
         self.dialog.grab_set()
         self.dialog.focus_set()
         self.entry_box.focus_get()
+
+    #ここからSignal window関係
 
     def signal_select(self,event):
 
@@ -152,9 +158,19 @@ class Application(tk.Frame):
         main_signal=self.parts_pudown.get()         #主信号機の種類
         sub_signal=self.attached_pudown.get()       #従属信号機の種類
         self.sig_select_menu.destroy()
-        if main_signal==("場内信号機" or "出発信号機"):
+        if locking=="設定しない":
+            pass
+        else :
             pass
         print(inset,light,indect,locking,main_signal,sub_signal)
+
+    def signal_maker(self,main_signal,sub_signal,light,inset,indect,locking):
+
+        pass
+
+    def locking_menu(self):
+
+        pass
     
     def signal_typeset(self,event):
 
@@ -178,7 +194,27 @@ class Application(tk.Frame):
             self.attached_pudown.config(state="readonly")
             self.attached_pudown["values"]=["入換信号機","入換標識","入信 入標共用","入信(誘導付属)","設置しない"]
             self.attached_pudown.current(4)
-        
+
+    #Signal window ここまで/ここからTurnOut window
+
+    def TurnOut_setup(self,event):
+
+        self.turnout_menu=tk.Toplevel(self)
+        self.turnout_menu.title("分岐器　新規作成")
+        self.turnout_menu.geometry("200x220+850+450")
+        self.turnout_menu.resizable(width=False, height=False)                                                            
+        self.turnout_menu.transient(self.master)
+        self.turnout_menu.grab_set()
+        self.turnout_menu.focus_set()
+
+        menu_frame=tk.Frame(self.turnout_menu,height=200,width=220)
+        info_label,label_object,y=["分岐器種類"," 動作方法 ","分岐器番号"," 番号標準 "," 転轍標識 "],[],10
+
+        for i in range(len(info_label)):
+            label_object.append(tk.Label(menu_frame,text=info_label[i],background="white"))
+            label_object[i].place(x=10,y=y)
+            y+=30
+        menu_frame.pack()
 
     def track_add(self,event):
 
@@ -212,8 +248,6 @@ class Application(tk.Frame):
         else :
             self.Route_view.delete("base_line")
         self.grid_modo=not self.grid_modo
-
-
 
 if __name__=="__main__":
 
